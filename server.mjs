@@ -142,7 +142,7 @@ app.post('/webhook', async (req, res) => {
 
 const _dirname = path.resolve();
 
-app.get('/', express.static(path.join(_dirname, "web")));
+app.post('/', express.static(path.join(_dirname, "web")));
 app.use('/', express.static(path.join(_dirname, "web")));
 app.use('*' , express.static(path.join(_dirname, "web")));
 
