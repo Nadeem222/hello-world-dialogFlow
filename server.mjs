@@ -4,13 +4,13 @@ import morgan from 'morgan';
 import moment from 'moment';
 import momentTZ from 'moment-timezone';
 import path from "path";
-import cors from "cors";
+// import cors from "cors";
 
 
 const app = express()
 app.use(express.json())
 app.use(morgan('dev'))
-app.use(cors)
+// app.use(cors)
 
 const PORT = process.env.PORT || 5001;
 
