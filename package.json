@@ -1,6 +1,7 @@
 {
   "name": "mongo-db-product-store",
   "version": "1.0.0",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -18,15 +19,11 @@
   },
   "homepage": "https://github.com/Nadeem222/Mongo-db-Product-store#readme",
   "dependencies": {
-    "dialogflow-fulfillment": "^0.6.1",
     "express": "^4.18.2",
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.41",
     "mongoose": "^6.8.0",
     "morgan": "^1.10.0",
-    "ngrok": "^4.3.3"
-  },
-  "devDependencies": {},
-  "keywords": [],
-  "description": ""
+    "path": "^0.12.7"
+  }
 }

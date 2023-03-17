@@ -1,17 +1,18 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import morgan from 'morgan';
 import moment from 'moment';
 import momentTZ from 'moment-timezone';
-import morgan from 'morgan';
+import path from "path";
+
 
 const app = express()
 app.use(express.json())
 app.use(morgan('dev'))
 
+const PORT = process.env.PORT || 5001;
 
-const PORT = process.env.PORT || 3001;
-
-const webhook = {
+ const webhookRequest = {
   "responseId": "response-id",
   "session": "projects/project-id/agent/sessions/session-id",
   "queryResult": {
@@ -49,58 +50,61 @@ const webhook = {
   },
   "originalDetectIntentRequest": {}
 }
-
-app.get("/ping" , (req , res ) => {
-  res.send("ping back");
+app.get("/ping" , (req,res) => {
+  req.send("ping back");
 })
 
-
-
-app.post("/webhook", async (req, res) => {
-  try {
+app.post('/webhook', async (req, res) => {
   
+  try {
     const body = req.body;
 
-    const intentName = body.queryResult.intent.displayName;
-    const params = body.queryResult.parameters;
+    const intentName = body.queryResult.intent.displayName
+    const params = body.queryResult.parameters
+    
+    if (intentName === 'Default Welcome Intent'){
 
-    if(intentName === "Default Welcome Intent"){
-      const currentTime = momentTZ.tz(moment(), "Asia/Karachi");
+      const currentTime = momentTZ.tz(moment(), "Asia/Karachi") 
 
-      const currentHour = moment(currentTime).format('HH');
-      console.log(currentHour);
+      const currentHour = +moment(currentTime).format('HH');
 
-      let greeting = "";
+      console.log('currentHour');
 
-      if(currentHour < 6 ){
-        greeting = "Good night"
-      }else if(currentHour < 12){
-        greeting = "Good morning"
+      let greeting = '';
+
+      if (currentHour < 6){
+        greeting = "Good Night"
+      }else if (currentHour < 12){
+        greeting = "Good Morning"
       }else if(currentHour < 15){
-        greeting = "Good afternoon"
-      }else if(currentHour < 17){
+        greeting = "Good Afternoon"
+      }else if (currentHour < 17 ){
         greeting = "Good Evening"
-      }else {
-        "Good night"
+      }else{
+        greeting = "Good Night"
       }
 
-      let responseText = `${greeting}!welcome to planzo pizza,how can i help you?`
+      let responseText = `${greeting}!welcome to Planzo Pizza,how can i help you?`
+      
+      console.log(responseText);
 
       res.send({
-        "fullfillmentMessages":[
+        "fulfillmentMessages": [
           {
             "text": {
-              "text":[
+              "text": [
                 responseText,
               ]
             }
           }
         ]
       })
-    }else if(intentName === "newOrder"){
+
+    }else if (intentName === 'newOrder'){
       console.log("collected params:" , params);
 
-      let responseText = `you said ${params.qty} ${params.pizzaSize} ${params.pizzaFlavours} pizza,your pizza is on the way,this reply came from webhook server`
+      let responseText = `you said ${params.qty} ${params.pizzaSize} ${params.pizzaFlavours} pizza,
+      your pizza is on the way,this reply came from webhook server`
 
       res.send({
         "fulfillmentMessages": [
@@ -119,14 +123,15 @@ app.post("/webhook", async (req, res) => {
           {
             "text": {
               "text": [
-                "Sorry webhook dont know the answer of your question"
+                "sorry webhook dont know answer for this question"
               ]
             }
           }
         ]
       })
     }
-  }catch (e) {
+
+  } catch (e) {
     res.status(500).send({
       message: "server error"
     })
@@ -134,11 +139,13 @@ app.post("/webhook", async (req, res) => {
 })
 
 
-// const _dirname = path.resolve();
 
-// app.get('/', express.static(path.join(_dirname, "web")));
-// app.use('/', express.static(path.join(_dirname, "web")));
-// // app.use('*' , express.static(path.join(_dirname, "web")));
+const _dirname = path.resolve();
+
+app.get('/', express.static(path.join(_dirname, "web")));
+app.use('/', express.static(path.join(_dirname, "web")));
+app.use('*' , express.static(path.join(_dirname, "web")));
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on PORT ${PORT}`)
@@ -152,7 +159,6 @@ let productSchema = new mongoose.Schema({
   createdOn: { type: Date, default: Date.now }
 });
 const productModel = mongoose.model('products', productSchema);
-
 
 let mongodbUri = 'mongodb+srv://dbuser:snadeema@cluster0.intzdzn.mongodb.net/?retryWrites=true&w=majority'
 
