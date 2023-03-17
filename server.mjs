@@ -70,7 +70,7 @@ app.post('/webhook', async (req, res) => {
 
       const currentHour = +moment(currentTime).format('HH');
 
-      console.log('currentHour');
+      console.log(currentHour);
 
       let greeting = '';
 
@@ -119,7 +119,7 @@ app.post('/webhook', async (req, res) => {
           }
         ]
       })
-    }else if (intentName === menu){
+    }else if (intentName === "Menu"){
         res.send({
             "fulfillmentMessages": [
               {
