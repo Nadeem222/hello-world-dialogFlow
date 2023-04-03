@@ -64,9 +64,10 @@ app.post('/webhook', async (req, res) => {
     const intentName = body.queryResult.intent.displayName
     const params = body.queryResult.parameters
     
-    if (intentName === 'Default Welcome Intent'){
 
-      const currentTime = momentTZ.tz(moment(), "Asia/Karachi") 
+    switch (intentName) {
+      case 'Default Welcome Intent':{
+        const currentTime = momentTZ.tz(moment(), "Asia/Karachi") 
 
       const currentHour = +moment(currentTime).format('HH');
 
@@ -101,61 +102,69 @@ app.post('/webhook', async (req, res) => {
           }
         ]
       })
+      }
+        
+        break;
 
-    }else if (intentName === 'newOrder'){
-      console.log("collected params:" , params);
+        case 'newOrder':
+          console.log("collected params:" , params);
+          console.log("collected params:" , params.name);
 
-      let responseText = `you said ${params.qty} ${params.pizzaSize} ${params.pizzaFlavours} pizza,
-      your pizza is on the way,this reply came from webhook server`
+          const newOrder = new orderModel ({
+            orderName : params.person.name,
+            pizzaSize :  params.pizzaSize,
+            pizzaFlavours : params.pizzaFlavours,
+            qty : params.qty
+          });
 
-      res.send({
-        "fulfillmentMessages": [
-          {
-            "text": {
-              "text": [
-                responseText,
-              ]
-            }
-          }
-        ]
-      })
-    }else if (intentName === "Menu"){
-        res.send({
+          const savedOrder = await newOrder.save();
+          console.log("New Order added" , savedOrder);
+
+          let responseText = `you said ${params.qty} ${params.pizzaSize} ${params.pizzaFlavours} pizza,
+          your pizza is on the way,this reply came from webhook server`
+    
+          res.send({
             "fulfillmentMessages": [
               {
-                "card": {
-                  "title": "card title",
-                  "subtitle": "card text",
-                  "imageUri": "https://example.com/images/example.png",
-                  "buttons": [
-                    {
-                      "text": "button text",
-                      "postback": "https://example.com/path/for/end-user/to/follow"
-                    }
+                "text": {
+                  "text": [
+                    responseText,
                   ]
                 }
               }
             ]
-          }
-        )
-    }else{
-      res.send({
-        "fulfillmentMessages": [
-          {
-            "text": {
-              "text": [
-                "sorry webhook dont know answer for this question"
-              ]
-            }
-          }
-        ]
-      })
-    }
+          })
 
+        break;
+    
+      default:
+        res.send({
+          "fulfillmentMessages": [
+            {
+              "text": {
+                "text": [
+                  "sorry webhook dont know answer for this question"
+                ]
+              }
+            }
+          ]
+        })
+        break;
+    }
   } catch (e) {
-    res.status(500).send({
-      message: "server error"
-    })
+    console.log("Error catching " , e);
+
+    res.send({
+          "fulfillmentMessages": [
+            {
+              "text": {
+                "text": [
+                  "something went wrong on server,please try again"
+                ]
+              }
+            }
+          ]
+        })
   }
 })
 
@@ -172,14 +181,15 @@ app.listen(PORT, () => {
   console.log(`Example app listening on PORT ${PORT}`)
 })
 
-let productSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  price: Number,
-  category: String,
-  description: String,
+let orderSchema = new mongoose.Schema({
+  orderName: { type: String, required: true },
+  pizzaSize: { type: String, required: true },
+  pizzaFlavours: { type: String, required: true },
+  qty: { type: Number, required: true },
+  status : { type: String, default : "pending" },
   createdOn: { type: Date, default: Date.now }
 });
-const productModel = mongoose.model('products', productSchema);
+const orderModel = mongoose.model('orders', orderSchema);
 
 let mongodbUri = 'mongodb+srv://dbuser:snadeema@cluster0.intzdzn.mongodb.net/?retryWrites=true&w=majority'
 
