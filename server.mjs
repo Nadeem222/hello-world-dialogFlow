@@ -121,7 +121,7 @@ app.post('/webhook', async (req, res) => {
         console.log("New Order added", savedOrder);
 
         let responseText = `you said ${params.qty} ${params.pizzaSize} ${params.pizzaFlavours} pizza,
-          your pizza is on the way,this reply came from webhook server`
+          your pizza is on the way.`
 
         res.send({
           "fulfillmentMessages": [
